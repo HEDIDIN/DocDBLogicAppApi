@@ -1,0 +1,796 @@
+{
+  "swagger" : "2.0",
+  "info" : {
+    "version" : "1.0.1",
+    "title" : "DocumentDB API for Logic Apps",
+    "description" : "DocumentDB API for Logic Apps"
+  },
+  "host" : "yourdatabaseaccount.documents.azure.com:443",
+  "basePath" : "/dbs",
+  "tags" : [ {
+    "name" : "Document",
+    "description" : "Documents section"
+  }, {
+    "name" : "Collections",
+    "description" : "Collections section"
+  }, {
+    "name" : "Attachment",
+    "description" : "Attachments section"
+  }, {
+    "name" : "StoredProcedure",
+    "description" : "Stored Procedures section"
+  } ],
+  "schemes" : [ "https" ],
+  "paths" : {
+    "/{rid-db}/colls/{rid-coll}/" : {
+      "get" : {
+        "tags" : [ "Document" ],
+        "summary" : "List Documents",
+        "description" : "**List Documents**- While consistency level is defined at the database account level during account creation, read consistency can be overridden to suffice the need of the application.  The override is set per GET operation by setting the x-ms-consistency-level header to the desired level.   The consistency override can only be the same or weaker than the level that was set during account creation Consistency levels from weakest to strongest is Eventual, Session, Bounded Staleness and Strong. 'For instance, if during account creation the consistency level was set to Session, the override cannot be Strong or Bounded. nFor information on consistent levels [Consistency levels in DocumentDB.](http://azure.microsoft.com/documentation/articles/documentdb-consistency-levels/)",
+        "operationId" : "ListDocuments",
+        "consumes" : [ ],
+        "produces" : [ "application/json" ],
+        "parameters" : [ {
+          "name" : "rid-db",
+          "in" : "path",
+          "description" : "The Database Id",
+          "required" : true,
+          "type" : "string"
+        }, {
+          "name" : "rid-coll",
+          "in" : "path",
+          "description" : "The Collection ID",
+          "required" : true,
+          "type" : "string"
+        }, {
+          "name" : "User-Agent",
+          "in" : "header",
+          "description" : "Optional. The string of client user agent performing the request.",
+          "required" : false,
+          "type" : "string"
+        }, {
+          "name" : "x-ms-documentdb-is-upsert",
+          "in" : "header",
+          "description" : "If set to true, DocumentDB will create the document with the id (and partition key value if applicable) if it doesn’t exist, or update the document if it exists.",
+          "required" : false,
+          "type" : "boolean"
+        }, {
+          "name" : "x-ms-indexing-directive",
+          "in" : "header",
+          "description" : "The default for indexing behavior is determined by the automatic property’s value in the indexing policy for the collection. The acceptable value is Include or Exclude.",
+          "required" : false,
+          "type" : "string",
+          "default" : "",
+          "enum" : [ "", "Include", "Exclude" ]
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "The operation was successful.",
+            "schema" : {
+              "type" : "array",
+              "items" : {
+                "$ref" : "#/definitions/Document"
+              }
+            }
+          },
+          "400" : {
+            "description" : "The override set in the x-ms-consistency-level header is stronger than the one set during account creation. For example, if the consistency level is Session, the override cannot be Strong or Bounded."
+          },
+          "401" : {
+            "description" : "The Authorization or x-ms-date header is not set. <c>401</c> is also returned when the Authorization header is set to an invalid authorization token"
+          },
+          "403" : {
+            "description" : "The authorization token has expired."
+          }
+        }
+      },
+      "post" : {
+        "tags" : [ "Document" ],
+        "summary" : "Create a Document",
+        "description" : "**Create a new Document** - Documents are automatically indexed. If automatic indexing is turned off at the collection level, documents can be manually included or excluded from being indexed by using the x-ms-indexing-directive header during the POST operation .Documents must adhere to size limits, as specified in [DocumentDB Limits.](http://azure.microsoft.com/documentation/articles/documentdb-limits/)",
+        "operationId" : "CreateDocument",
+        "consumes" : [ "application/json" ],
+        "produces" : [ "application/json" ],
+        "parameters" : [ {
+          "name" : "rid-db",
+          "in" : "path",
+          "description" : "The Database Id",
+          "required" : true,
+          "type" : "string"
+        }, {
+          "name" : "rid-coll",
+          "in" : "path",
+          "description" : "The Collection ID",
+          "required" : true,
+          "type" : "string"
+        }, {
+          "in" : "body",
+          "name" : "Request",
+          "required" : true,
+          "schema" : {
+            "$ref" : "#/definitions/CustomBody"
+          }
+        }, {
+          "name" : "User-Agent",
+          "in" : "header",
+          "description" : "Optional. The string of client user agent performing the request.",
+          "required" : false,
+          "type" : "string"
+        } ],
+        "responses" : {
+          "201" : {
+            "description" : "Created",
+            "schema" : {
+              "$ref" : "#/definitions/Document"
+            }
+          },
+          "400" : {
+            "description" : "The JSON body is invalid."
+          },
+          "401" : {
+            "description" : "The Authorization or x-ms-date header is not set. <c>401</c> is also returned when the Authorization header is set to an invalid authorization token"
+          },
+          "403" : {
+            "description" : "The operation could not be completed because the storage limit of the partition has been reached."
+          },
+          "404" : {
+            "description" : "The document size in the request exceeded the allowable document size. For more information about document size limits"
+          }
+        }
+      }
+    },
+    "/{rid-db}/colls/{rid-coll}/docs" : {
+      "post" : {
+        "tags" : [ "Collections" ],
+        "summary" : "Query Documents",
+        "description" : "You can query arbitrary JSON documents in a collection by performing a POST against the “colls” resource in DocumentDB. The SQL syntax of DocumentDB provides hierarchical, relational, and spatial query operators to query and project documents",
+        "operationId" : "QueryDocuments",
+        "consumes" : [ "application/json" ],
+        "produces" : [ "application/json" ],
+        "parameters" : [ {
+          "name" : "rid-db",
+          "in" : "path",
+          "description" : "The Database Id",
+          "required" : true,
+          "type" : "string"
+        }, {
+          "name" : "rid-coll",
+          "in" : "path",
+          "description" : "The Collection ID",
+          "required" : true,
+          "type" : "string"
+        }, {
+          "name" : "User-Agent",
+          "in" : "header",
+          "required" : false,
+          "type" : "string"
+        }, {
+          "name" : "Content-Type",
+          "in" : "header",
+          "description" : "Required. The Content-Type header must be application/json.",
+          "required" : true,
+          "type" : "string",
+          "default" : "application/query+json"
+        }, {
+          "name" : "x-ms-documentdb-isquery",
+          "in" : "header",
+          "required" : true,
+          "type" : "boolean",
+          "default" : true
+        }, {
+          "name" : "x-ms-max-item-count",
+          "in" : "header",
+          "required" : false,
+          "type" : "integer",
+          "format" : "int32",
+          "description" : "An integer indicating the maximum number of items to be returned per page. Queries will return no more than the specified number of items per page, but could be fewer depending on the collection performance tier and their sizes. An x-ms-max-item-count of -1 can be specified to let the service determine the optimal item count. This is the recommended configuration value for x-ms-max-item-count."
+        }, {
+          "name" : "x-ms-documentdb-query-enablecrosspartition",
+          "in" : "header",
+          "required" : false,
+          "type" : "boolean",
+          "description" : "If the collection is partitioned, this must be set to True to allow execution across multiple partitions. Queries that filter against a single partition key, or against single-partitioned collections do not need to set the header."
+        }, {
+          "name" : "x-ms-consistency-level",
+          "in" : "header",
+          "required" : false,
+          "type" : "string",
+          "description" : "This is the consistency level override. The valid values are: Strong, Bounded, Session, or Eventual (in order of strongest to weakest). The override must be the same or weaker than the account’s configured consistency level."
+        }, {
+          "name" : "x-ms-continuation",
+          "in" : "header",
+          "required" : false,
+          "type" : "string",
+          "description" : "A string token returned for queries and read-feed operations if there are more results to be read. Clients can retrieve the next page of results by resubmitting the request with the x-ms-continuation request header set to this value."
+        }, {
+          "name" : "x-ms-sessiotoken",
+          "in" : "header",
+          "type" : "string",
+          "description" : "A string token used with session level consistency. Clients must echo the latest read value of this header during read requests for session consistency.",
+          "required" : false
+        }, {
+          "in" : "body",
+          "name" : "Request",
+          "required" : true,
+          "schema" : {
+            "$ref" : "#/definitions/QueryRequest"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "The operation was successful",
+            "schema" : {
+              "$ref" : "#/definitions/Document"
+            }
+          },
+          "400" : {
+            "description" : "The override set in the x-ms-consistency-level header is stronger than the one set during account creation. For example, if the consistency level is Session, the override cannot be Strong or Bounded."
+          },
+          "401" : {
+            "description" : "The Authorization or x-ms-date header is not set. <c>>401</c> is also returned when the Authorization header is set to an invalid authorization token."
+          },
+          "403" : {
+            "description" : "The authorization token has expired."
+          },
+          "404" : {
+            "description" : "The document is no longer a resource, i.e. the document was deleted"
+          }
+        }
+      }
+    },
+    "/{rid-db}/colls/{rid-coll}/docs/{rid-doc}" : {
+      "put" : {
+        "tags" : [ "Document" ],
+        "summary" : "Replace a Document",
+        "description" : "**Replace a Document**- Performing a PUT operation on a specific document resource replaces the entire document resource. All user settable properties, including the id, and the user defined JSON elements must be submitted in the body to perform the replacement- Any element omissions result in unintended data loss as this operation is a full replace operation. The x-ms-indexing-directive header can be set and submitted for the operation to include or exclude the document from being indexed.",
+        "operationId" : "ReplaceDocument",
+        "consumes" : [ "application/json" ],
+        "produces" : [ "application/json" ],
+        "parameters" : [ {
+          "name" : "rid-db",
+          "in" : "path",
+          "description" : "The Database Id",
+          "required" : true,
+          "type" : "string"
+        }, {
+          "name" : "rid-coll",
+          "in" : "path",
+          "description" : "The Collection ID",
+          "required" : true,
+          "type" : "string"
+        }, {
+          "name" : "rid-doc",
+          "in" : "path",
+          "description" : "The Document ID",
+          "required" : true,
+          "type" : "string"
+        }, {
+          "in" : "body",
+          "name" : "Request",
+          "required" : false,
+          "schema" : {
+            "$ref" : "#/definitions/Document"
+          }
+        }, {
+          "name" : "User-Agent",
+          "in" : "header",
+          "description" : "Optional. The string of client user agent performing the request.",
+          "required" : false,
+          "type" : "string"
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "The operation was successful.",
+            "schema" : {
+              "$ref" : "#/definitions/Document"
+            }
+          },
+          "400" : {
+            "description" : "The JSON body is invalid. Check for missing curly brackets or quotes."
+          },
+          "401" : {
+            "description" : "The Authorization or x-ms-date header is not set. 401 is also  returned when the Authorization header is set to an invalid authorization token"
+          },
+          "404" : {
+            "description" : "The document no longer exists, i.e. the document was deleted"
+          },
+          "409" : {
+            "description" : "The id provided for the new document has been taken by an  existing document."
+          },
+          "413" : {
+            "description" : "The document size in the request exceeded the allowable document size in a request"
+          }
+        }
+      },
+      "get" : {
+        "tags" : [ "Document" ],
+        "summary" : "Get a Document by Id.",
+        "description" : "**Get a Document By Id**- While consistency level is defined at the database account level during account creation, read consistency can be overridden to suffice the need of the application.- The override  is set per GET operation by setting the x-ms-consistency-level header to he desired level. - The consistency override can only be the same or weaker than the level that was set during account creation.- Consistency levels from weakest to strongest is Eventual, Session, Bounded Staleness and Strong. For information on consistent level, see [Consistency levels in DocumentDB.](http://azure.microsoft.com/documentation/articles/documentdb-consistency-levels/)",
+        "operationId" : "GetDocumentById",
+        "consumes" : [ ],
+        "produces" : [ "application/json" ],
+        "parameters" : [ {
+          "name" : "rid-db",
+          "in" : "path",
+          "description" : "The Database Id",
+          "required" : true,
+          "type" : "string"
+        }, {
+          "name" : "rid-coll",
+          "in" : "path",
+          "description" : "The Collection ID",
+          "required" : true,
+          "type" : "string"
+        }, {
+          "name" : "rid-doc",
+          "in" : "path",
+          "description" : "The Document ID",
+          "required" : true,
+          "type" : "string"
+        }, {
+          "name" : "User-Agent",
+          "in" : "header",
+          "required" : false,
+          "type" : "string"
+        }, {
+          "name" : "If-None-Match",
+          "in" : "header",
+          "type" : "string",
+          "description" : "The value should be the etag of the resource. Makes operation conditional, i.e. the response includes a body only the value in the database is different from the specified value in the header.",
+          "required" : false
+        }, {
+          "name" : "x-ms-documentdb-partitionkey",
+          "in" : "header",
+          "type" : "array",
+          "items" : {
+            "type" : "string"
+          },
+          "description" : "The partition key value for the document to be read. Must be included if and only if the collection is created with a partitionKey definition.",
+          "required" : false
+        }, {
+          "name" : "x-ms-sessiontoken",
+          "in" : "header",
+          "type" : "string",
+          "description" : "A string token used with session level consistency. Clients must echo the latest read value of this header during read requests for session consistency.",
+          "required" : false
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "The operation was successful",
+            "schema" : {
+              "$ref" : "#/definitions/Document"
+            }
+          },
+          "304" : {
+            "description" : "The document requested was not modified since the specified eTag value in the If-Match header. The service returns an empty response body."
+          },
+          "400" : {
+            "description" : "The override set in the x-ms-consistency-level header is stronger than the one set during account creation. For example, if the consistency level is Session, the override cannot be Strong or Bounded."
+          },
+          "404" : {
+            "description" : "The document is no longer a resource, i.e. the document was  deleted"
+          }
+        }
+      },
+      "delete" : {
+        "tags" : [ "Document" ],
+        "summary" : "Delete a Document",
+        "description" : "**Delete a Document by Id** Performing a DELETE operation on a specific document resource deletes the document resource from the collection.",
+        "operationId" : "DeleteDocument",
+        "consumes" : [ ],
+        "produces" : [ ],
+        "parameters" : [ {
+          "name" : "rid-db",
+          "in" : "path",
+          "description" : "The Database Id",
+          "required" : true,
+          "type" : "string"
+        }, {
+          "name" : "rid-coll",
+          "in" : "path",
+          "description" : "The Collection ID",
+          "required" : true,
+          "type" : "string"
+        }, {
+          "name" : "rid-doc",
+          "in" : "path",
+          "description" : "The Document ID",
+          "required" : true,
+          "type" : "string"
+        }, {
+          "name" : "User-Agent",
+          "in" : "header",
+          "description" : "Optional. The string of client user agent performing the request.",
+          "required" : false,
+          "type" : "string"
+        } ],
+        "responses" : {
+          "204" : {
+            "description" : "The delete operation was successful."
+          },
+          "401" : {
+            "description" : "The Authorization or x-ms-date header is not set. 401 is also  returned when the Authorization header is set to an invalid authorization  token"
+          },
+          "404" : {
+            "description" : "The document no longer exists, i.e. the document was already deleted"
+          }
+        }
+      }
+    },
+    "/{rid-db}/colls/{rid-coll}/docs/{rid-doc}/attachments" : {
+      "post" : {
+        "tags" : [ "Attachment" ],
+        "summary" : "Create an Attachment",
+        "description" : "**Create an Attachment**There are two ways to create an attachment  resource – ** post the media content to DocumentDB like in the AtomPub Protocol **, or ** post just the attachment metadata to media stored externally **",
+        "operationId" : "CreateAttachement",
+        "consumes" : [ "application/json", "application/dicom", "image/jpeg", "image/png", "text/plain", "video/mpeg", "audio/mpeg", "application/octet-stream", "application/msword", "application/vnd.ms-excel", "application/pdf", "application/zip", "application/x-javascript", "text/html", "application/x-x509-ca-cert" ],
+        "produces" : [ "application/json" ],
+        "parameters" : [ {
+          "name" : "rid-db",
+          "in" : "path",
+          "description" : "The Database Id",
+          "required" : true,
+          "type" : "string"
+        }, {
+          "name" : "rid-coll",
+          "in" : "path",
+          "description" : "The Collection ID",
+          "required" : true,
+          "type" : "string"
+        }, {
+          "name" : "rid-doc",
+          "in" : "path",
+          "description" : "The Document ID",
+          "required" : true,
+          "type" : "string"
+        }, {
+          "in" : "body",
+          "name" : "Request",
+          "required" : true,
+          "schema" : {
+            "$ref" : "#/definitions/AttachmentRaw"
+          }
+        }, {
+          "name" : "User-Agent",
+          "in" : "header",
+          "required" : false,
+          "type" : "string"
+        }, {
+          "name" : "Slug",
+          "in" : "header",
+          "type" : "string",
+          "required" : false,
+          "description" : "The name of the attachment. This is only required when raw media is submitted to the DocumentDB attachment storage"
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "The operation was successful",
+            "schema" : {
+              "$ref" : "#/definitions/AttachmentRequest"
+            }
+          },
+          "400" : {
+            "description" : "The JSON body is invalid. Check for missing curly brackets or quotes"
+          },
+          "409" : {
+            "description" : "The id or Slug provided for the new attachment has been taken by an existing attachment."
+          },
+          "413" : {
+            "description" : "The document size in the request exceeded the allowable document size in a request, which is 512k"
+          }
+        }
+      },
+      "get" : {
+        "tags" : [ "Attachment" ],
+        "summary" : "Get a list of Attachments",
+        "description" : "**Get a list of Attachments under a document**",
+        "operationId" : "GetAttachementsList",
+        "consumes" : [ "application/json" ],
+        "produces" : [ "application/json", "application/dicom", "image/jpeg", "image/png", "text/plain", "video/mpeg", "audio/mpeg", "application/octet-stream", "application/msword", "application/vnd.ms-excel", "application/pdf", "application/zip", "application/x-javascript", "text/html", "application/x-x509-ca-cert" ],
+        "parameters" : [ {
+          "name" : "rid-db",
+          "in" : "path",
+          "description" : "The Database Id",
+          "required" : true,
+          "type" : "string"
+        }, {
+          "name" : "rid-coll",
+          "in" : "path",
+          "description" : "The Collection ID",
+          "required" : true,
+          "type" : "string"
+        }, {
+          "name" : "rid-doc",
+          "in" : "path",
+          "description" : "The Document ID",
+          "required" : true,
+          "type" : "string"
+        }, {
+          "name" : "User-Agent",
+          "in" : "header",
+          "required" : false,
+          "type" : "string"
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "The operation was successful",
+            "schema" : {
+              "$ref" : "#/definitions/AttachmentResponse"
+            }
+          }
+        }
+      }
+    },
+    "/{rid-db}/colls/{rid-coll}/sprocs/{rid-proc}" : {
+      "post" : {
+        "tags" : [ "StoredProcedure" ],
+        "summary" : "Execute a Stored Procedure",
+        "description" : "**Execute a Stored Procedure**-  For information on how stored procedures work, including execution of a stored procedure, see [DocumentDB programming Stored procedures](http://azure.microsoft.com/eus/documentation/articles/documentdb-programming/)",
+        "operationId" : "ExecuteStoredProcedure",
+        "consumes" : [ "application/json" ],
+        "produces" : [ "application/json" ],
+        "parameters" : [ {
+          "name" : "rid-db",
+          "in" : "path",
+          "description" : "The Database Id",
+          "required" : true,
+          "type" : "string"
+        }, {
+          "name" : "rid-coll",
+          "in" : "path",
+          "description" : "The Collection ID",
+          "required" : true,
+          "type" : "string"
+        }, {
+          "name" : "rid-proc",
+          "in" : "path",
+          "description" : "The Procedure ID",
+          "required" : true,
+          "type" : "string"
+        }, {
+          "in" : "body",
+          "name" : "Request",
+          "required" : true,
+          "schema" : {
+            "$ref" : "#/definitions/QueryRequest"
+          }
+        }, {
+          "name" : "Content-Type",
+          "in" : "header",
+          "description" : "Required. The Content-Type header must be application/json.",
+          "required" : true,
+          "type" : "string",
+          "default" : "application/query+json"
+        }, {
+          "name" : "x-ms-documentdb-query-enable-scan",
+          "in" : "header",
+          "required" : true,
+          "type" : "boolean",
+          "default" : true
+        }, {
+          "name" : "x-ms-documentdb-isquery",
+          "in" : "header",
+          "required" : true,
+          "type" : "boolean",
+          "default" : true
+        }, {
+          "name" : "User-Agent",
+          "in" : "header",
+          "required" : false,
+          "type" : "string"
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "Success",
+            "schema" : {
+              "$ref" : "#/definitions/QueryResponseBody"
+            }
+          },
+          "400" : {
+            "description" : "The syntax of the SQL statement is incorrect"
+          }
+        }
+      }
+    }
+  },
+  "definitions" : {
+    "Document" : {
+      "required" : [ "id" ],
+      "properties" : {
+        "id" : {
+          "type" : "string",
+          "description" : "This is a user settable property. It is the unique name that identifies the document, i.e. no two documents will share the same id within a database. The id must not exceed 255 characters."
+        },
+        "custom" : {
+          "type" : "object"
+        },
+        "_rid" : {
+          "type" : "string",
+          "description" : "This is a system generated property. The resource ID (_rid) is a unique identifier that is also hierarchical per the resource stack on the resource model. It is used internally for placement and navigation of the document resource."
+        },
+        "ttl" : {
+          "type" : "integer",
+          "format" : "int32",
+          "description" : "Time to Live - seconds"
+        },
+        "_ts" : {
+          "type" : "integer",
+          "format" : "int32",
+          "description" : "This is a system generated property. It specifies the last updated timestamp of the resource. The value is a timestamp."
+        },
+        "_self" : {
+          "type" : "string",
+          "description" : "This is a system generated property. It is the unique addressable URI for the resource."
+        },
+        "_etag" : {
+          "type" : "string",
+          "description" : "This is a system generated property that specifies the resource etag required for optimistic concurrency control."
+        },
+        "_attachments" : {
+          "type" : "string",
+          "description" : "This is a system generated property that specifies the addressable path for the attachments resource."
+        }
+      },
+      "description" : "The document resource is represented by docs in the DocumentDB resource model. A document consists of user-defined content in JSON format. Aside from the required id property, users can define any arbitrary elements, structures, and hierarchies for the content. The id element is a unique string that is user-settable and must not exceed 255 characters."
+    },
+    "AttachmentResponse" : {
+      "description" : "Attachments are special documents that contain references and associated metadata with an external blob or media file.",
+      "properties" : {
+        "_rid" : {
+          "type" : "string"
+        },
+        "_count" : {
+          "type" : "integer",
+          "format" : "int32",
+          "description" : "The number of items returned."
+        },
+        "Attachments" : {
+          "type" : "array",
+          "items" : {
+            "$ref" : "#/definitions/Attachments"
+          }
+        }
+      }
+    },
+    "QueryRequest" : {
+      "required" : [ "QueryString", "parameters" ],
+      "properties" : {
+        "QueryString" : {
+          "type" : "string",
+          "description" : "The SQL query string for the query"
+        },
+        "parameters" : {
+          "type" : "array",
+          "description" : "A JSON array of parameters specified as name value pairs. The parameter array can contain from zero to many parameters.Each parameter must have the following values:name: the name of the parameter. Parameter names must be valid string literals and begin with ‘@’.value: the value of the parameter. Can be any valid JSON value (string, number, object, array, Boolean or null).",
+          "items" : {
+            "type" : "string"
+          }
+        }
+      },
+      "description" : "Perform a SQL query on a resource"
+    },
+    "QueryResponseBody" : {
+      "properties" : {
+        "_rid" : {
+          "type" : "string",
+          "description" : "The resource id for the collection used within the query"
+        },
+        "_count" : {
+          "type" : "integer",
+          "format" : "int32",
+          "description" : "The number of items returned."
+        },
+        "Documents" : {
+          "description" : "The array containing the query results.",
+          "type" : "array",
+          "items" : {
+            "type" : "object"
+          }
+        }
+      },
+      "description" : "The response body for the query operation consists of the _rid of the parent resource of the resource being queried, and the resource array containing the resource properties for the projection and selection"
+    },
+    "CustomBody" : {
+      "properties" : {
+        "custom" : {
+          "description" : "A JSON array of parameters specified as name value pairs.",
+          "type" : "array",
+          "items" : {
+            "type" : "string"
+          }
+        }
+      }
+    },
+    "Attachments" : {
+      "properties" : {
+        "contentType" : {
+          "type" : "string",
+          "description" : "The content type of the attachment."
+        },
+        "id" : {
+          "type" : "string"
+        },
+        "Media" : {
+          "type" : "string",
+          "description" : "This is the URL link or file path where the attachment resides."
+        },
+        "_rid" : {
+          "type" : "string",
+          "description" : "This is a system generated property."
+        },
+        "_ts" : {
+          "type" : "integer",
+          "format" : "int32",
+          "description" : "This is a system generated property. It specifies the last updated mestamp of the resource. The value is a timestamp."
+        },
+        "_self" : {
+          "type" : "string",
+          "description" : "This is a system generated property."
+        },
+        "_etag" : {
+          "type" : "string",
+          "description" : "This is a system generated property representing the resource  etag required for optimistic concurrency control."
+        }
+      }
+    },
+    "AttachmentRaw" : {
+      "required" : [ "ContentType", "Slug" ],
+      "properties" : {
+        "ContentType" : {
+          "type" : "string",
+          "description" : "The content type of the attachment."
+        },
+        "Slug" : {
+          "type" : "string",
+          "description" : "The name of the attachment"
+        },
+        "User-Agent" : {
+          "type" : "string",
+          "description" : "The client user agent performing the request"
+        },
+        "id" : {
+          "type" : "string",
+          "description" : "This is the attachment name and type."
+        },
+        "_rid" : {
+          "type" : "string",
+          "description" : "This is a system generated property."
+        },
+        "_ts" : {
+          "type" : "integer",
+          "format" : "int32",
+          "description" : "This is a system generated property. It specifies the last updated timestamp of the resource. The value is a timestamp."
+        },
+        "_self" : {
+          "type" : "string",
+          "description" : "This is a system generated property."
+        },
+        "_etag" : {
+          "type" : "string",
+          "description" : "This is a system generated property representing the resource etag required for optimistic concurrency control."
+        },
+        "_permissions" : {
+          "type" : "string",
+          "description" : "This is a system generated property denoting the addressable path of the feed of permissions resource."
+        }
+      },
+      "description" : "POST the raw media in the body payload to store it in the provided attachment storage under your DocumentDB account.  To create this type of attachment, developers include the raw attachment (video, audio, file, blob, etc.) as the body of the POST. Two headers must be set: `Content-Type` and `Slug`. The Content-Type header is set to the MIME type of the attachment while the Slug header is set to the name of the attachment."
+    },
+    "AttachmentRequest" : {
+      "properties" : {
+        "id" : {
+          "type" : "string",
+          "description" : "Not Required to be set when attaching raw media. This is a user settable property. It is the unique name that identifies the attachment, i.e. no two attachments will share the same id. The id must not exceed 255 characters."
+        },
+        "contentType" : {
+          "type" : "string",
+          "description" : "Not Required to be set when attaching raw media. This is a user settable property. It notes the content type of the attachment. When submitting the attachment bits as body, DocumentDB sets the contentType to the type set in the Content-Type header."
+        },
+        "Media" : {
+          "type" : "string",
+          "description" : "Not Required to be set when attaching raw media. This is the URL link or file path where the attachment resides."
+        }
+      }
+    }
+  }
+}
